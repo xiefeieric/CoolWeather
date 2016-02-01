@@ -15,12 +15,15 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
+import org.xutils.common.Callback;
+import org.xutils.http.RequestParams;
 import org.xutils.x;
 
 import java.io.IOException;
 import java.util.List;
 
 import uk.me.feixie.coolweather.R;
+import uk.me.feixie.coolweather.util.GlobalConstant;
 import uk.me.feixie.coolweather.util.UIUtils;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -34,11 +37,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
         initData();
         initToolbar();
-
-
     }
 
     private void initData() {
+
         x.Ext.init(getApplication());
         x.Ext.setDebug(true);
 
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 } else {
                     Address address = addressList.get(0);
 //                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
+                    updateFromWeb(address.getLocality());
                 }
 
             } catch (IOException e) {
@@ -121,4 +124,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+    private void updateFromWeb(String cityName) {
+        RequestParams url = new RequestParams(GlobalConstant.WEATHER_SERVER+cityName+GlobalConstant.OPEN_API_KEY+GlobalConstant.UNIT_CELSIUS);
+        x.http().get(url, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                System.out.println(result);
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+
+            }
+
+            @Override
+            public void onFinished() {
+
+            }
+        });
+    }
+
 }
