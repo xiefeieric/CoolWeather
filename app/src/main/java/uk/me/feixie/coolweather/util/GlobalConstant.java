@@ -8,6 +8,8 @@ public class GlobalConstant {
     public static final String OPEN_API_KEY = "&appid=cc0d847424665d15e9c9668c87ba90e5";
 
     public static final String WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/weather?q=";
+    public static final String ONE_DAY_WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/forecast?q=";
+
 
     public static final String UNIT_CELSIUS = "&units=metric";
 
