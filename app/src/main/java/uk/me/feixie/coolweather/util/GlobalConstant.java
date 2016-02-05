@@ -9,6 +9,8 @@ public class GlobalConstant {
 
     public static final String WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/weather?q=";
     public static final String ONE_DAY_WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/forecast?q=";
+    public static final String WEATHER_FORECAST_SERVER = "http://api.openweathermap.org/data/2.5/daily?q=";
+//    api.openweathermap.org/data/2.5/forecast/daily?q=London&mode=xml&units=metric&cnt=7
 
 
     public static final String UNIT_CELSIUS = "&units=metric";

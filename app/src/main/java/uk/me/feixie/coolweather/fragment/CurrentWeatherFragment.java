@@ -214,7 +214,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         if (!TextUtils.isEmpty(temp)) {
             double tempDouble = Double.parseDouble(temp);
             int tempRound = (int) NumberHelper.round(tempDouble, 0);
-            tvTemp.setText(tempRound + "");
+            tvTemp.setText(tempRound + "°");
         }
 
         tvDesc.setText(mSharedPreferences.getString("description", ""));

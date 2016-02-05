@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.fragment.CurrentWeatherFragment;
 import uk.me.feixie.coolweather.fragment.OneDayWeatherFragment;
+import uk.me.feixie.coolweather.fragment.WeatherForecastFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
             list.add(new CurrentWeatherFragment());
             list.add(new CurrentWeatherFragment());
             list.add(new OneDayWeatherFragment());
-            list.add(new OneDayWeatherFragment());
+            list.add(new WeatherForecastFragment());
             return list.get(position);
         }
 
