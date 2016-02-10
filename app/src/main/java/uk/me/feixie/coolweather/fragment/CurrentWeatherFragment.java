@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -49,6 +50,8 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     private TextView tvHumidity;
     private TextView tvWindSpeed;
     private SharedPreferences mSharedPreferences;
+    private ImageView ivCurrentWeather;
+    private ImageView ivCurrentWeatherCover;
 
     public CurrentWeatherFragment() {
         // Required empty public constructor
@@ -87,6 +90,8 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         tvDesc = (TextView) view.findViewById(R.id.tvDesc);
         tvHumidity = (TextView) view.findViewById(R.id.tvHumidity);
         tvWindSpeed = (TextView) view.findViewById(R.id.tvWindSpeed);
+        ivCurrentWeather = (ImageView) view.findViewById(R.id.ivCurrentWeather);
+        ivCurrentWeatherCover = (ImageView) view.findViewById(R.id.ivCurrentWeatherCover);
     }
 
     @Override
@@ -115,7 +120,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                 } else {
                     Address address = addressList.get(0);
 //                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
-                    mSharedPreferences.edit().putString("current_city",address.getLocality()).apply();
+                    mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
                     updateFromWeb(address.getLocality());
                 }
 
@@ -178,6 +183,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
             JSONArray weatherArray = jsonObject.getJSONArray("weather");
             JSONObject weather = weatherArray.getJSONObject(0);
             String description = weather.getString("description");
+            String icon = weather.getString("icon");
 //            System.out.println(description);
 
             JSONObject main = jsonObject.getJSONObject("main");
@@ -190,17 +196,18 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
             String speed = wind.getString("speed");
 //            System.out.println(speed);
 
-            saveWeatherInfoToLocal(description, temp, humidity, speed);
+            saveWeatherInfoToLocal(description, icon, temp, humidity, speed);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private void saveWeatherInfoToLocal(String description, String temp, String humidity, String speed) {
+    private void saveWeatherInfoToLocal(String description, String icon, String temp, String humidity, String speed) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("description", description);
+        editor.putString("icon", icon);
         editor.putString("temp", temp);
         editor.putString("humidity", humidity);
         editor.putString("speed", speed);
@@ -219,7 +226,42 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
 
         tvDesc.setText(mSharedPreferences.getString("description", ""));
         tvHumidity.setText(mSharedPreferences.getString("humidity", "") + "%");
-        tvWindSpeed.setText(mSharedPreferences.getString("speed", "") + " km/h");
+        tvWindSpeed.setText(mSharedPreferences.getString("speed", "") + " m/s");
 
+        String icon = mSharedPreferences.getString("icon", "");
+        if (icon.equalsIgnoreCase("01d")) {
+            ivCurrentWeather.setImageResource(R.drawable.sun_disc);
+            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+        } else if (icon.equalsIgnoreCase("02d")) {
+            ivCurrentWeather.setImageResource(R.drawable.sun_disc);
+            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_mist);
+        } else if (icon.equalsIgnoreCase("03d") || icon.equalsIgnoreCase("03n")) {
+            ivCurrentWeather.setVisibility(View.INVISIBLE);
+            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_lite);
+        } else if (icon.equalsIgnoreCase("04d") || icon.equalsIgnoreCase("04n")) {
+            ivCurrentWeather.setVisibility(View.INVISIBLE);
+            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_dark);
+        } else if (icon.equalsIgnoreCase("09d") || icon.equalsIgnoreCase("09n")) {
+            ivCurrentWeather.setImageResource(R.drawable.cloud_lite);
+            ivCurrentWeatherCover.setImageResource(R.drawable.rain_drops_light);
+        } else if (icon.equalsIgnoreCase("10d") || icon.equalsIgnoreCase("10n")) {
+            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
+            ivCurrentWeatherCover.setImageResource(R.drawable.rain_drops_heavy);
+        } else if (icon.equalsIgnoreCase("11d") || icon.equalsIgnoreCase("11n")) {
+            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
+            ivCurrentWeatherCover.setImageResource(R.drawable.thunderbolts_glow);
+        } else if (icon.equalsIgnoreCase("13d") || icon.equalsIgnoreCase("13n")) {
+            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
+            ivCurrentWeatherCover.setImageResource(R.drawable.snow_flakes);
+        } else if (icon.equalsIgnoreCase("50d") || icon.equalsIgnoreCase("50n")) {
+            ivCurrentWeather.setImageResource(R.drawable.mist_dark);
+            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+        } else if (icon.equalsIgnoreCase("01n")) {
+            ivCurrentWeather.setImageResource(R.drawable.moon);
+            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+        } else if (icon.equalsIgnoreCase("02n")) {
+            ivCurrentWeather.setImageResource(R.drawable.moon);
+            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_mist);
+        }
     }
 }

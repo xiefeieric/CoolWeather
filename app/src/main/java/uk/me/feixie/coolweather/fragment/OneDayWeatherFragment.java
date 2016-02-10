@@ -26,6 +26,7 @@ import java.util.List;
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.util.GlobalConstant;
 import uk.me.feixie.coolweather.util.NumberHelper;
+import uk.me.feixie.coolweather.util.UIUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -180,69 +181,71 @@ public class OneDayWeatherFragment extends Fragment {
 
     private void initListeners() {
 
-        ll3Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(0));
-            }
-        });
+        if (descList!=null) {
+            ll3Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(0));
+                }
+            });
 
-        ll6Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(1));
-            }
-        });
+            ll6Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(1));
+                }
+            });
 
-        ll9Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(2));
-            }
-        });
+            ll9Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(2));
+                }
+            });
 
-        ll12Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(3));
-            }
-        });
+            ll12Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(3));
+                }
+            });
 
-        ll15Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(4));
-            }
-        });
+            ll15Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(4));
+                }
+            });
 
-        ll18Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(5));
-            }
-        });
+            ll18Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(5));
+                }
+            });
 
-        ll21Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(6));
-            }
-        });
+            ll21Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(6));
+                }
+            });
 
-        ll24Hour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkLayoutClick(v);
-                tvOneDayDesc.setText(descList.get(7));
-            }
-        });
+            ll24Hour.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkLayoutClick(v);
+                    tvOneDayDesc.setText(descList.get(7));
+                }
+            });
+        }
 
     }
 
@@ -261,13 +264,12 @@ public class OneDayWeatherFragment extends Fragment {
             public void onSuccess(String result) {
 //                System.out.println(result);
                 handleWeatherResponse(result);
-//                updateCurrentWeather();
                 tvOneDayDesc.setText(descList.get(0));
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-
+                UIUtils.showToast(getActivity(), "Network Error! Please try again later!");
             }
 
             @Override
@@ -301,7 +303,7 @@ public class OneDayWeatherFragment extends Fragment {
                 String[] split = dt_txt.split(" ");
                 String time = split[1];
                 time = time.substring(0, 5);
-//                System.out.println(temp + " / " + description + " / " + time + "\n");
+                System.out.println(temp + " / " + description + " / " + time + "\n");
                 timeList.get(i).setText(time);
                 tempList.get(i).setText(temperature + "°");
                 x.image().bind(iconList.get(i), GlobalConstant.WEATHER_ICON_PATH + icon + ".png");

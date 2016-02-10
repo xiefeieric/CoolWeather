@@ -13,12 +13,27 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".activity.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:context=".activity.MainActivity">
 
-    <ImageView
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp"/>
+        android:layout_height="250dp"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:id="@+id/ivCurrentWeather"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:src="@drawable/cloud_dark"/>
+
+        <ImageView
+            android:id="@+id/ivCurrentWeatherCover"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:src="@drawable/snow_flakes"/>
+
+    </FrameLayout>
+
 
     <TextView
         android:id="@+id/tvTemp"

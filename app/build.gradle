@@ -27,4 +27,5 @@ dependencies {
     compile 'org.xutils:xutils:3.3.8'
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.android.support:support-v4:23.1.1'
+    compile 'fr.avianey.com.viewpagerindicator:library:2.4.1@aar'
 }
