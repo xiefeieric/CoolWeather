@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.viewpagerindicator.CirclePageIndicator;
 
@@ -22,12 +23,15 @@ import java.util.ArrayList;
 
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.fragment.CurrentWeatherFragment;
+import uk.me.feixie.coolweather.fragment.LocationFragment;
 import uk.me.feixie.coolweather.fragment.OneDayWeatherFragment;
 import uk.me.feixie.coolweather.fragment.WeatherForecastFragment;
 
 public class MainActivity extends AppCompatActivity {
 
     private ViewPager vpMain;
+    private MenuItem mItemRefresh;
+    private MenuItem mItemAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +39,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initToolbar();
         initViews();
+        initListeners();
     }
 
     private void initToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar supportActionBar = getSupportActionBar();
+//        supportActionBar.setDisplayShowHomeEnabled(true);
         supportActionBar.setTitle("");
+        TextView textView = new TextView(this);
+        textView.setText("London");
+        textView.setTextColor(getResources().getColor(R.color.white));
+        textView.setTextSize(20);
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("textview clicked");
+            }
+        });
+        supportActionBar.setCustomView(textView);
+//        supportActionBar.setHomeActionContentDescription("London");
+        supportActionBar.setDisplayShowCustomEnabled(true);
     }
 
     private void initViews() {
@@ -56,10 +75,43 @@ public class MainActivity extends AppCompatActivity {
         circlePageIndicator.setViewPager(vpMain,1);
     }
 
+    private void initListeners() {
+        vpMain.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                checkCurrentPager(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
+    private void checkCurrentPager(int position) {
+        if (position==0) {
+            mItemRefresh.setVisible(false);
+            mItemAdd.setVisible(true);
+        } else {
+            mItemRefresh.setVisible(true);
+            mItemAdd.setVisible(false);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mItemRefresh = menu.findItem(R.id.action_refresh);
+        mItemAdd = menu.findItem(R.id.action_add);
+        checkCurrentPager(vpMain.getCurrentItem());
+
         return true;
     }
 
@@ -93,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             ArrayList<Fragment> list = new ArrayList();
-            list.add(new CurrentWeatherFragment());
+            list.add(new LocationFragment());
             list.add(new CurrentWeatherFragment());
             list.add(new OneDayWeatherFragment());
             list.add(new WeatherForecastFragment());

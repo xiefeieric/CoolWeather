@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.List;
 
 import uk.me.feixie.coolweather.R;
+import uk.me.feixie.coolweather.db.CoolWeatherDB;
+import uk.me.feixie.coolweather.model.City;
 import uk.me.feixie.coolweather.util.GlobalConstant;
 import uk.me.feixie.coolweather.util.NumberHelper;
 import uk.me.feixie.coolweather.util.UIUtils;
@@ -121,6 +123,22 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                     Address address = addressList.get(0);
 //                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
                     mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
+
+                    boolean cityInList = checkCityInList(mSharedPreferences.getString("current_city", ""));
+
+                    if (!cityInList) {
+                        City city = new City();
+                        city.setName(address.getLocality());
+                        city.setLongitude(String.valueOf(address.getLongitude()));
+                        city.setLatitude(String.valueOf(address.getLatitude()));
+                        city.setPostcode(address.getPostalCode());
+                        city.setCountry(address.getCountryName());
+                        city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
+                        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+                        coolWeatherDB.saveCity(city);
+                    }
+
+
                     updateFromWeb(address.getLocality());
                 }
 
@@ -140,6 +158,17 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    private boolean checkCityInList(String city) {
+        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+        List<City> cities = coolWeatherDB.queryAllCity();
+        for (int i = 0; i < cities.size(); i++) {
+            boolean inList = cities.get(i).getName().equalsIgnoreCase(mSharedPreferences.getString("current_city", ""));
+            if (inList)
+                return true;
+        }
+        return false;
     }
 
     private void updateFromWeb(String cityName) {

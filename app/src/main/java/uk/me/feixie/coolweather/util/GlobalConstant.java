@@ -18,4 +18,7 @@ public class GlobalConstant {
 
     public static final String UNIT_FAHRENHEIT = "&units=imperial";
 
+    public static final String LOCATION_STATUS_CURRENT = "gps";
+    public static final String LOCATION_STATUS_INPUT = "input";
+
 }

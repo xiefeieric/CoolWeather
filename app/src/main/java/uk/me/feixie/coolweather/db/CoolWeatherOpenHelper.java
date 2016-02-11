@@ -18,7 +18,7 @@ public class CoolWeatherOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String sql = "create table city (_id primary key autoincrement, name text, latitude text, longitude text, postcode text, country text)";
+        String sql = "create table city (_id INTEGER primary key autoincrement, name text, latitude text, longitude text, postcode text, country text, status text)";
         db.execSQL(sql);
 
     }

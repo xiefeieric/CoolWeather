@@ -89,13 +89,9 @@ public class OneDayWeatherFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_one_day_weather, container, false);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         initData();
         initViews(view);
-
-        String current_city = mSharedPreferences.getString("current_city", "");
-        if (!TextUtils.isEmpty(current_city)) {
-            updateFromWeb(current_city);
-        }
         initListeners();
 
         return view;
@@ -106,7 +102,11 @@ public class OneDayWeatherFragment extends Fragment {
         x.Ext.init(getActivity().getApplication());
         x.Ext.setDebug(true);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String current_city = mSharedPreferences.getString("current_city", "");
+        if (!TextUtils.isEmpty(current_city)) {
+            updateFromWeb(current_city);
+        }
+
     }
 
     private void initViews(View view) {
@@ -181,84 +181,91 @@ public class OneDayWeatherFragment extends Fragment {
 
     private void initListeners() {
 
-        if (descList!=null) {
-            ll3Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll3Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(0));
                 }
-            });
+            }
+        });
 
-            ll6Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll6Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(1));
                 }
-            });
+            }
+        });
 
-            ll9Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll9Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(2));
                 }
-            });
+            }
+        });
 
-            ll12Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll12Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(3));
                 }
-            });
+            }
+        });
 
-            ll15Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll15Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(4));
                 }
-            });
+            }
+        });
 
-            ll18Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll18Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(5));
                 }
-            });
+            }
+        });
 
-            ll21Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll21Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(6));
                 }
-            });
+            }
+        });
 
-            ll24Hour.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkLayoutClick(v);
+        ll24Hour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkLayoutClick(v);
+                if (descList.size() == 8) {
                     tvOneDayDesc.setText(descList.get(7));
                 }
-            });
-        }
-
+            }
+        });
     }
-
 
     private void updateFromWeb(String cityName) {
         RequestParams url = new RequestParams(GlobalConstant.ONE_DAY_WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
 //        System.out.println(url.toString());
-        x.http().get(url, new Callback.CacheCallback<String>() {
-            @Override
-            public boolean onCache(String result) {
-//                System.out.println(result);
-                return false;
-            }
+        x.http().get(url, new Callback.CommonCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
@@ -303,7 +310,7 @@ public class OneDayWeatherFragment extends Fragment {
                 String[] split = dt_txt.split(" ");
                 String time = split[1];
                 time = time.substring(0, 5);
-                System.out.println(temp + " / " + description + " / " + time + "\n");
+//                System.out.println(temp + " / " + description + " / " + time + "\n");
                 timeList.get(i).setText(time);
                 tempList.get(i).setText(temperature + "°");
                 x.image().bind(iconList.get(i), GlobalConstant.WEATHER_ICON_PATH + icon + ".png");

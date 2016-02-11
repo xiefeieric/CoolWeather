@@ -13,6 +13,7 @@ public class City implements Serializable {
     private String longitude;
     private String postcode;
     private String country;
+    private String status;
 
     public int getId() {
         return id;
@@ -62,6 +63,14 @@ public class City implements Serializable {
         this.country = country;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "City{" +
@@ -71,6 +80,7 @@ public class City implements Serializable {
                 ", longitude='" + longitude + '\'' +
                 ", postcode='" + postcode + '\'' +
                 ", country='" + country + '\'' +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

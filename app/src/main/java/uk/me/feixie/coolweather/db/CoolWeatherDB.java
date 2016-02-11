@@ -40,6 +40,7 @@ public class CoolWeatherDB {
             values.put("longitude", city.getLongitude());
             values.put("postcode", city.getPostcode());
             values.put("country", city.getCountry());
+            values.put("status", city.getStatus());
             db.insert(TABLE_NAME, null, values);
         }
     }
@@ -48,7 +49,7 @@ public class CoolWeatherDB {
 
         List<City> cities = new ArrayList<>();
 
-        Cursor cursor = db.query(TABLE_NAME, new String[]{"name"}, null, null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null);
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 City city = new City();
@@ -62,6 +63,8 @@ public class CoolWeatherDB {
                 city.setPostcode(postcode);
                 String country = cursor.getString(cursor.getColumnIndex("country"));
                 city.setCountry(country);
+                String status = cursor.getString(cursor.getColumnIndex("status"));
+                city.setStatus(status);
                 cities.add(city);
             }
         }
