@@ -14,6 +14,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -171,7 +173,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         return false;
     }
 
-    private void updateFromWeb(String cityName) {
+    public void updateFromWeb(String cityName) {
         RequestParams url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
 //        System.out.println(url.toString());
         x.http().get(url, new Callback.CacheCallback<String>() {

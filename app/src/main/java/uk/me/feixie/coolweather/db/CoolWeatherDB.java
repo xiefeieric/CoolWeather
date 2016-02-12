@@ -31,7 +31,7 @@ public class CoolWeatherDB {
         return sCoolWeatherDB;
     }
 
-    public void saveCity(City city) {
+    public synchronized void saveCity(City city) {
         if (city != null) {
             ContentValues values = new ContentValues();
 //            name text, latitude text, longitude text, postcode text, country text)
@@ -45,7 +45,7 @@ public class CoolWeatherDB {
         }
     }
 
-    public List<City> queryAllCity() {
+    public synchronized List<City> queryAllCity() {
 
         List<City> cities = new ArrayList<>();
 
@@ -70,5 +70,11 @@ public class CoolWeatherDB {
         }
 
         return cities;
+    }
+
+    public synchronized void deleteCity(City city) {
+        if (city != null) {
+            db.delete(TABLE_NAME,"name=?",new String[]{city.getName()});
+        }
     }
 }

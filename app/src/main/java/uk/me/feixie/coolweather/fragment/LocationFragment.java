@@ -1,7 +1,9 @@
 package uk.me.feixie.coolweather.fragment;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +27,8 @@ public class LocationFragment extends Fragment {
 
     private RecyclerView rvLocation;
     private List<City> mCityList;
+    private LocationAdapter mAdapter;
+    private SharedPreferences mSharedPreferences;
 
 
     public LocationFragment() {
@@ -42,16 +46,26 @@ public class LocationFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        initData();
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void initData() {
         CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
         mCityList = coolWeatherDB.queryAllCity();
     }
 
     private void initViews(View view) {
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
         rvLocation = (RecyclerView) view.findViewById(R.id.rvLocation);
         rvLocation.setLayoutManager(new LinearLayoutManager(getActivity()));
-        LocationAdapter adapter = new LocationAdapter();
-        rvLocation.setAdapter(adapter);
+        mAdapter = new LocationAdapter();
+        rvLocation.setAdapter(mAdapter);
     }
 
 
@@ -66,6 +80,14 @@ public class LocationFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(LocationViewHolder holder, int position) {
+            City city = mCityList.get(position);
+            if (position==0) {
+                holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_checked_white_24dp);
+            }
+            if (city.getName().equalsIgnoreCase(mSharedPreferences.getString("current_city",""))) {
+                holder.tvLocationName.setText(mCityList.get(position).getName());
+                holder.ivLocationDelete.setVisibility(View.GONE);
+            }
             holder.tvLocationName.setText(mCityList.get(position).getName());
         }
 
@@ -90,7 +112,25 @@ public class LocationFragment extends Fragment {
 
             ivLocationRadio = (ImageView) itemView.findViewById(R.id.ivLocationRadio);
             tvLocationName = (TextView) itemView.findViewById(R.id.tvLocationName);
+
             ivLocationDelete = (ImageView) itemView.findViewById(R.id.ivLocationDelete);
+            ivLocationDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final City city = mCityList.get(getAdapterPosition());
+                    mCityList.remove(city);
+                    mAdapter.notifyItemRemoved(getAdapterPosition());
+
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getContext());
+                            coolWeatherDB.deleteCity(city);
+                        }
+                    }.start();
+
+                }
+            });
 
             llLocation = (LinearLayout) itemView.findViewById(R.id.llLocation);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

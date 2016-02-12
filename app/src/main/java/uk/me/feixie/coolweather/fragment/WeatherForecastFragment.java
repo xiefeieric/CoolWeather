@@ -79,7 +79,7 @@ public class WeatherForecastFragment extends Fragment {
 
     }
 
-    private void updateFromWeb(String cityName) {
+    public void updateFromWeb(String cityName) {
         RequestParams url = new RequestParams(GlobalConstant.WEATHER_FORECAST_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS+"&cnt=7");
 //        System.out.println(url.toString());
         x.http().get(url, new Callback.CacheCallback<String>() {
