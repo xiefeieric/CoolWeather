@@ -68,10 +68,14 @@ public class OneDayWeatherFragment extends Fragment {
         x.Ext.setDebug(true);
 
         String current_city = mSharedPreferences.getString("current_city", "");
-        if (!TextUtils.isEmpty(current_city)) {
+        String select_city = mSharedPreferences.getString("select_city", "");
+        if (!TextUtils.isEmpty(current_city) && TextUtils.isEmpty(select_city)) {
+            current_city = current_city.replaceAll("\\s+","");
             updateFromWeb(current_city);
+        } else {
+            select_city = select_city.replaceAll("\\s+","");
+            updateFromWeb(select_city);
         }
-
     }
 
     private void initViews(View view) {

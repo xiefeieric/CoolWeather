@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private List<City> mCityList;
     private MyPagerAdapter mAdapter;
     private SharedPreferences mSharedPreferences;
+    private TextView mTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,17 +71,21 @@ public class MainActivity extends AppCompatActivity {
         ActionBar supportActionBar = getSupportActionBar();
 //        supportActionBar.setDisplayShowHomeEnabled(true);
         supportActionBar.setTitle("");
-        TextView textView = new TextView(this);
-        textView.setText("London");
-        textView.setTextColor(getResources().getColor(R.color.white));
-        textView.setTextSize(20);
-        textView.setOnClickListener(new View.OnClickListener() {
+        mTextView = new TextView(this);
+        if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
+            mTextView.setText(mSharedPreferences.getString("current_city",""));
+        } else {
+            mTextView.setText(mSharedPreferences.getString("select_city",""));
+        }
+        mTextView.setTextColor(getResources().getColor(R.color.white));
+        mTextView.setTextSize(20);
+        mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 System.out.println("textview clicked");
             }
         });
-        supportActionBar.setCustomView(textView);
+        supportActionBar.setCustomView(mTextView);
 //        supportActionBar.setHomeActionContentDescription("London");
         supportActionBar.setDisplayShowCustomEnabled(true);
     }
@@ -107,6 +112,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 checkCurrentPager(position);
+                if (position==0) {
+                    mTextView.setText("Location");
+                } else {
+                    if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
+                        mTextView.setText(mSharedPreferences.getString("current_city",""));
+                    } else {
+                        mTextView.setText(mSharedPreferences.getString("select_city",""));
+                    }
+                }
             }
 
             @Override
@@ -268,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
         public int getCount() {
             return 4;
         }
+
+
     }
 
 }

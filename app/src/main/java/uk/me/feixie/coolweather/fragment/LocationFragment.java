@@ -2,11 +2,13 @@ package uk.me.feixie.coolweather.fragment;
 
 
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,8 @@ import uk.me.feixie.coolweather.model.City;
  * A simple {@link Fragment} subclass.
  */
 public class LocationFragment extends Fragment {
+
+    private static int clickPosition;
 
     private RecyclerView rvLocation;
     private List<City> mCityList;
@@ -80,14 +84,38 @@ public class LocationFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(LocationViewHolder holder, int position) {
-            City city = mCityList.get(position);
-            if (position==0) {
-                holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_checked_white_24dp);
-            }
-            if (city.getName().equalsIgnoreCase(mSharedPreferences.getString("current_city",""))) {
+
+            String location_click_position = mSharedPreferences.getString("location_click_position", "");
+
+            if (position == 0) {
                 holder.tvLocationName.setText(mCityList.get(position).getName());
                 holder.ivLocationDelete.setVisibility(View.GONE);
             }
+
+            if (clickPosition == position) {
+                holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_checked_white_24dp);
+                holder.llLocation.setBackgroundColor(getResources().getColor(R.color.selectedColor));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    holder.llLocation.setElevation(30f);
+                }
+            } else {
+                holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_unchecked_white_24dp);
+                holder.llLocation.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            }
+
+            if (!TextUtils.isEmpty(location_click_position)) {
+                if (position == Integer.parseInt(location_click_position)) {
+                    holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_checked_white_24dp);
+                    holder.llLocation.setBackgroundColor(getResources().getColor(R.color.selectedColor));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        holder.llLocation.setElevation(30f);
+                    }
+                } else {
+                    holder.ivLocationRadio.setImageResource(R.drawable.ic_radio_button_unchecked_white_24dp);
+                    holder.llLocation.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+                }
+            }
+
             holder.tvLocationName.setText(mCityList.get(position).getName());
         }
 
@@ -111,7 +139,30 @@ public class LocationFragment extends Fragment {
             super(itemView);
 
             ivLocationRadio = (ImageView) itemView.findViewById(R.id.ivLocationRadio);
+
             tvLocationName = (TextView) itemView.findViewById(R.id.tvLocationName);
+            tvLocationName.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+//                    System.out.println(getAdapterPosition());
+                    clickPosition = getAdapterPosition();
+//                    System.out.println(clickPosition);
+                    mAdapter.notifyDataSetChanged();
+                    String name = mCityList.get(clickPosition).getName();
+
+                    //delete all space
+//                    name = name.replaceAll("\\s+","");
+
+//                    mSharedPreferences.edit().putString("current_city",name).commit();
+                    if (clickPosition == 0) {
+                        mSharedPreferences.edit().putString("select_city","").apply();
+                    } else {
+                        mSharedPreferences.edit().putString("select_city",name).apply();
+                    }
+
+                    mSharedPreferences.edit().putString("location_click_position", String.valueOf(clickPosition)).apply();
+                }
+            });
 
             ivLocationDelete = (ImageView) itemView.findViewById(R.id.ivLocationDelete);
             ivLocationDelete.setOnClickListener(new View.OnClickListener() {

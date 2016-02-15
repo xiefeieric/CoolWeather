@@ -14,8 +14,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -61,7 +64,6 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -86,6 +88,38 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         }
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        String current_city = mSharedPreferences.getString("current_city", "");
+        String select_city = mSharedPreferences.getString("select_city", "");
+        if (!TextUtils.isEmpty(current_city) && TextUtils.isEmpty(select_city)) {
+            current_city = current_city.replaceAll("\\s+","");
+            updateFromWeb(current_city);
+        } else {
+            select_city = select_city.replaceAll("\\s+","");
+            updateFromWeb(select_city);
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            if (mSharedPreferences!=null) {
+                String current_city = mSharedPreferences.getString("current_city", "");
+                String select_city = mSharedPreferences.getString("select_city", "");
+
+                if (!TextUtils.isEmpty(current_city) && TextUtils.isEmpty(select_city)) {
+                    current_city = current_city.replaceAll("\\s+","");
+                    updateFromWeb(current_city);
+
+                } else {
+                    select_city = select_city.replaceAll("\\s+","");
+                    updateFromWeb(select_city);
+
+                }
+            }
+
+        }
     }
 
     private void initViews(View view) {
@@ -140,8 +174,12 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                         coolWeatherDB.saveCity(city);
                     }
 
-
-                    updateFromWeb(address.getLocality());
+                    String select_city = mSharedPreferences.getString("select_city", "");
+                    if (TextUtils.isEmpty(select_city)) {
+                        updateFromWeb(address.getLocality());
+                    } else {
+                        updateFromWeb(select_city);
+                    }
                 }
 
             } catch (IOException e) {
@@ -166,7 +204,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
         List<City> cities = coolWeatherDB.queryAllCity();
         for (int i = 0; i < cities.size(); i++) {
-            boolean inList = cities.get(i).getName().equalsIgnoreCase(mSharedPreferences.getString("current_city", ""));
+            boolean inList = cities.get(i).getName().equalsIgnoreCase(city);
             if (inList)
                 return true;
         }
@@ -176,12 +214,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     public void updateFromWeb(String cityName) {
         RequestParams url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
 //        System.out.println(url.toString());
-        x.http().get(url, new Callback.CacheCallback<String>() {
-            @Override
-            public boolean onCache(String result) {
-//                System.out.println(result);
-                return false;
-            }
+        x.http().get(url, new Callback.CommonCallback<String>() {
 
             @Override
             public void onSuccess(String result) {
@@ -259,40 +292,266 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         tvHumidity.setText(mSharedPreferences.getString("humidity", "") + "%");
         tvWindSpeed.setText(mSharedPreferences.getString("speed", "") + " m/s");
 
+        final Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator());
+        fadeIn.setDuration(500);
+        fadeIn.setFillAfter(true);
+
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(500);
+        fadeOut.setFillAfter(true);
+
         String icon = mSharedPreferences.getString("icon", "");
         if (icon.equalsIgnoreCase("01d")) {
-            ivCurrentWeather.setImageResource(R.drawable.sun_disc);
-            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.sun_disc));
+                    ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+                    ivCurrentWeather.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
+
         } else if (icon.equalsIgnoreCase("02d")) {
-            ivCurrentWeather.setImageResource(R.drawable.sun_disc);
-            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_mist);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.sun_disc));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.cloud_mist));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("03d") || icon.equalsIgnoreCase("03n")) {
-            ivCurrentWeather.setVisibility(View.INVISIBLE);
-            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_lite);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setVisibility(View.INVISIBLE);
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.cloud_lite));
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("04d") || icon.equalsIgnoreCase("04n")) {
-            ivCurrentWeather.setVisibility(View.INVISIBLE);
-            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_dark);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setVisibility(View.INVISIBLE);
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.cloud_dark));
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("09d") || icon.equalsIgnoreCase("09n")) {
-            ivCurrentWeather.setImageResource(R.drawable.cloud_lite);
-            ivCurrentWeatherCover.setImageResource(R.drawable.rain_drops_light);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.cloud_lite));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.rain_drops_light));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("10d") || icon.equalsIgnoreCase("10n")) {
-            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
-            ivCurrentWeatherCover.setImageResource(R.drawable.rain_drops_heavy);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.cloud_dark));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.rain_drops_heavy));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("11d") || icon.equalsIgnoreCase("11n")) {
-            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
-            ivCurrentWeatherCover.setImageResource(R.drawable.thunderbolts_glow);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.cloud_dark));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.thunderbolts_glow));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("13d") || icon.equalsIgnoreCase("13n")) {
-            ivCurrentWeather.setImageResource(R.drawable.cloud_dark);
-            ivCurrentWeatherCover.setImageResource(R.drawable.snow_flakes);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.cloud_dark));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.snow_flakes));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("50d") || icon.equalsIgnoreCase("50n")) {
-            ivCurrentWeather.setImageResource(R.drawable.mist_dark);
-            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.mist_dark));
+                    ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+                    ivCurrentWeather.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("01n")) {
-            ivCurrentWeather.setImageResource(R.drawable.moon);
-            ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.moon));
+                    ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
+                    ivCurrentWeather.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         } else if (icon.equalsIgnoreCase("02n")) {
-            ivCurrentWeather.setImageResource(R.drawable.moon);
-            ivCurrentWeatherCover.setImageResource(R.drawable.cloud_mist);
+            ivCurrentWeather.startAnimation(fadeOut);
+            ivCurrentWeatherCover.startAnimation(fadeOut);
+            fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.moon));
+                    ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.cloud_mist));
+                    ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeatherCover.startAnimation(fadeIn);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+
         }
     }
 }
