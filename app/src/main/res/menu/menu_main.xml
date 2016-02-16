@@ -5,8 +5,9 @@
 
     <item
         android:id="@+id/action_refresh"
-        android:orderInCategory="100"
         android:icon="@drawable/ic_refresh_white_24dp"
+        android:actionViewClass=
+            "com.manuelpeinado.refreshactionitem.RefreshActionItem"
         android:title="Refresh"
         app:showAsAction="ifRoom"/>
     <item

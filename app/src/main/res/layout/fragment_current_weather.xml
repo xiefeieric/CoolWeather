@@ -23,14 +23,12 @@
         <ImageView
             android:id="@+id/ivCurrentWeather"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:src="@drawable/cloud_dark"/>
+            android:layout_height="250dp"/>
 
         <ImageView
             android:id="@+id/ivCurrentWeatherCover"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:src="@drawable/snow_flakes"/>
+            android:layout_height="250dp"/>
 
     </FrameLayout>
 

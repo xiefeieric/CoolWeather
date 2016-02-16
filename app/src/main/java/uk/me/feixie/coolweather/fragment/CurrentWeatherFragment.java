@@ -19,6 +19,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -51,7 +53,6 @@ import uk.me.feixie.coolweather.util.UIUtils;
 public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
     private TextView tvTemp;
     private TextView tvDesc;
     private TextView tvHumidity;
@@ -119,6 +120,11 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                 }
             }
 
+        } else {
+            if (ivCurrentWeather!=null && ivCurrentWeatherCover!=null) {
+                ivCurrentWeather.clearAnimation();
+                ivCurrentWeatherCover.clearAnimation();
+            }
         }
     }
 
@@ -147,12 +153,12 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (lastLocation != null) {
 
             try {
                 Geocoder geocoder = new Geocoder(getActivity());
-                List<Address> addressList = geocoder.getFromLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1);
+                List<Address> addressList = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
                 if (addressList == null || addressList.size() == 0) {
                     UIUtils.showToast(getActivity(), "No address found!");
                 } else {
@@ -221,6 +227,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
 //                System.out.println(result);
                 handleWeatherResponse(result);
                 updateCurrentWeather();
+//                System.out.println("refresh");
             }
 
             @Override
@@ -302,6 +309,11 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         fadeOut.setDuration(500);
         fadeOut.setFillAfter(true);
 
+        final Animation rotate = new RotateAnimation(0,360,RotateAnimation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        rotate.setRepeatCount(Animation.INFINITE);
+        rotate.setDuration(100000);
+        rotate.setInterpolator(new LinearInterpolator());
+
         String icon = mSharedPreferences.getString("icon", "");
         if (icon.equalsIgnoreCase("01d")) {
             ivCurrentWeather.startAnimation(fadeOut);
@@ -317,6 +329,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                     ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.sun_disc));
                     ivCurrentWeatherCover.setVisibility(View.INVISIBLE);
                     ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeather.startAnimation(rotate);
                 }
 
                 @Override
@@ -340,6 +353,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                     ivCurrentWeather.setImageDrawable(getResources().getDrawable(R.drawable.sun_disc));
                     ivCurrentWeatherCover.setImageDrawable(getResources().getDrawable(R.drawable.cloud_mist));
                     ivCurrentWeather.startAnimation(fadeIn);
+                    ivCurrentWeather.startAnimation(rotate);
                     ivCurrentWeatherCover.startAnimation(fadeIn);
                 }
 

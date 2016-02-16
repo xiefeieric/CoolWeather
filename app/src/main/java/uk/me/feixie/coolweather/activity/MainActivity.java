@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -54,12 +55,14 @@ public class MainActivity extends AppCompatActivity {
     private MyPagerAdapter mAdapter;
     private SharedPreferences mSharedPreferences;
     private TextView mTextView;
+    private SparseArrayCompat<Fragment> mFragmentArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mFragmentArray = new SparseArrayCompat<>();
         initToolbar();
         initViews();
         initListeners();
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("textview clicked");
+//                System.out.println("textview clicked");
             }
         });
         supportActionBar.setCustomView(mTextView);
@@ -93,6 +96,11 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
 
         FragmentManager supportFragmentManager = getSupportFragmentManager();
+        mFragmentArray.put(0,new LocationFragment());
+        mFragmentArray.put(1,new CurrentWeatherFragment());
+        mFragmentArray.put(2,new OneDayWeatherFragment());
+        mFragmentArray.put(3,new WeatherForecastFragment());
+
         vpMain = (ViewPager) findViewById(R.id.vpMain);
         mAdapter = new MyPagerAdapter(supportFragmentManager);
         vpMain.setAdapter(mAdapter);
@@ -170,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            System.out.println("setting");
+//            System.out.println("setting");
             return true;
         }
 
@@ -178,16 +186,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshWeather() {
-        String current_city = mSharedPreferences.getString("current_city", "");
-        if (!TextUtils.isEmpty(current_city)) {
-            CurrentWeatherFragment currentWeatherFragment = (CurrentWeatherFragment) mAdapter.getItem(1);
-            currentWeatherFragment.updateFromWeb(current_city);
-            OneDayWeatherFragment oneDayWeatherFragment = (OneDayWeatherFragment) mAdapter.getItem(2);
-            oneDayWeatherFragment.updateFromWeb(current_city);
-            WeatherForecastFragment weatherForecastFragment = (WeatherForecastFragment) mAdapter.getItem(3);
-            weatherForecastFragment.updateFromWeb(current_city);
-        }
 
+        String current_city = mSharedPreferences.getString("current_city", "");
+        String select_city = mSharedPreferences.getString("select_city", "");
+
+        CurrentWeatherFragment currentWeatherFragment = (CurrentWeatherFragment) mFragmentArray.get(1);
+        OneDayWeatherFragment oneDayWeatherFragment = (OneDayWeatherFragment) mFragmentArray.get(2);
+        WeatherForecastFragment weatherFragment = (WeatherForecastFragment) mFragmentArray.get(3);
+
+        if (!TextUtils.isEmpty(current_city) && TextUtils.isEmpty(select_city)) {
+            current_city = current_city.replaceAll("\\s+","");
+            currentWeatherFragment.updateFromWeb(current_city);
+            oneDayWeatherFragment.updateFromWeb(current_city);
+            weatherFragment.updateFromWeb(current_city);
+        } else {
+            select_city = select_city.replaceAll("\\s+","");
+            currentWeatherFragment.updateFromWeb(select_city);
+            oneDayWeatherFragment.updateFromWeb(select_city);
+            weatherFragment.updateFromWeb(select_city);
+        }
     }
 
     private void addCity() {
@@ -270,12 +287,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            ArrayList<Fragment> list = new ArrayList();
-            list.add(new LocationFragment());
-            list.add(new CurrentWeatherFragment());
-            list.add(new OneDayWeatherFragment());
-            list.add(new WeatherForecastFragment());
-            return list.get(position);
+            return mFragmentArray.get(position);
         }
 
         @Override

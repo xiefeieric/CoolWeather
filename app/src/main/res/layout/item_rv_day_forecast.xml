@@ -63,8 +63,8 @@
             android:layout_weight="1"
             android:gravity="right"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            tools:text="3°"/>
+            android:textSize="18sp"
+            tools:text="13°"/>
 
     </LinearLayout>
 

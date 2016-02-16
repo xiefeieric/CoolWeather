@@ -57,6 +57,10 @@ public class LocationFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
     }
 
+    public void test() {
+        System.out.println("test print location");
+    }
+
     private void initData() {
         CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
         mCityList = coolWeatherDB.queryAllCity();
