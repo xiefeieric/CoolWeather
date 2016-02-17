@@ -45,6 +45,19 @@ public class CoolWeatherDB {
         }
     }
 
+    public synchronized void updateCurrentCity(City city) {
+        if (city!=null) {
+            ContentValues values = new ContentValues();
+            values.put("name", city.getName());
+            values.put("latitude", city.getLatitude());
+            values.put("longitude", city.getLongitude());
+            values.put("postcode", city.getPostcode());
+            values.put("country", city.getCountry());
+            values.put("status", city.getStatus());
+            db.update(TABLE_NAME,values,"_id=?",new String[]{"1"});
+        }
+    }
+
     public synchronized List<City> queryAllCity() {
 
         List<City> cities = new ArrayList<>();

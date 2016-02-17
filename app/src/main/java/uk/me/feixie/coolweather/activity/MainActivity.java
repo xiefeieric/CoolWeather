@@ -1,5 +1,7 @@
 package uk.me.feixie.coolweather.activity;
 
+import android.animation.Animator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -16,11 +18,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.transition.Slide;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -110,7 +122,32 @@ public class MainActivity extends AppCompatActivity {
         circlePageIndicator.setViewPager(vpMain,1);
     }
 
+    private int pagePosition;
     private void initListeners() {
+
+        final Animation fadeIn = new AlphaAnimation(0, 1);
+        fadeIn.setInterpolator(new DecelerateInterpolator());
+        fadeIn.setDuration(500);
+        fadeIn.setFillAfter(true);
+
+        final Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setDuration(500);
+        fadeOut.setFillAfter(true);
+
+        Animation rotate = new RotateAnimation(0,360,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        rotate.setInterpolator(new AccelerateInterpolator());
+        rotate.setDuration(500);
+
+
+        Animation scale = new ScaleAnimation(1.0f,0.1f,1.0f,0.1f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        scale.setDuration(500);
+        scale.setInterpolator(new LinearInterpolator());
+
+        final AnimationSet animationSet = new AnimationSet(this,null);
+        animationSet.addAnimation(rotate);
+        animationSet.addAnimation(scale);
+
         vpMain.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -119,15 +156,91 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                checkCurrentPager(position);
+
+//                checkCurrentPager(position);
+                pagePosition = position;
+
                 if (position==0) {
-                    mTextView.setText("Location");
-                } else {
-                    if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
-                        mTextView.setText(mSharedPreferences.getString("current_city",""));
-                    } else {
-                        mTextView.setText(mSharedPreferences.getString("select_city",""));
-                    }
+
+                    mTextView.startAnimation(fadeOut);
+                    fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            mTextView.setText("Location");
+                            mTextView.startAnimation(fadeIn);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+
+                    mItemRefresh.getActionView().startAnimation(animationSet);
+                    animationSet.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            checkCurrentPager(pagePosition);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+
+                } else if (position==1) {
+                    mTextView.startAnimation(fadeOut);
+                    fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
+                                mTextView.setText(mSharedPreferences.getString("current_city",""));
+                            } else {
+                                mTextView.setText(mSharedPreferences.getString("select_city",""));
+                            }
+                            mTextView.startAnimation(fadeIn);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+
+                    mItemAdd.getActionView().startAnimation(animationSet);
+                    animationSet.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            checkCurrentPager(pagePosition);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+
                 }
             }
 
@@ -136,11 +249,46 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (vpMain.getCurrentItem()!=0) {
+                    selectCity();
+                }
+            }
+        });
+    }
+
+    private void selectCity() {
+        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(this);
+        final List<City> cityList = coolWeatherDB.queryAllCity();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        CharSequence[] items = new CharSequence[cityList.size()];
+        for (int i = 0; i < cityList.size(); i++) {
+            items[i] = cityList.get(i).getName()+", "+cityList.get(i).getCountry();
+        }
+        builder.setTitle("Select Location");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                City city = cityList.get(which);
+//                System.out.println(city.getName());
+                mSharedPreferences.edit().putString("select_city",city.getName()).apply();
+                mSharedPreferences.edit().putString("location_click_position", String.valueOf(which)).apply();
+                mTextView.setText(city.getName());
+                refreshWeather();
+            }
+        });
+        builder.setNegativeButton("CANCEL",null);
+        builder.show();
     }
 
     private void checkCurrentPager(int position) {
         if (position==0) {
+            mItemRefresh.getActionView().clearAnimation();
             mItemRefresh.setVisible(false);
+            mItemRefresh.getActionView().setVisibility(View.GONE);
             mItemAdd.setVisible(true);
         } else {
             mItemRefresh.setVisible(true);
@@ -151,9 +299,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        final Animation rotate = new RotateAnimation(0,360,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        rotate.setInterpolator(new LinearInterpolator());
+        rotate.setDuration(1000);
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
         mItemRefresh = menu.findItem(R.id.action_refresh);
+        View view = View.inflate(this,R.layout.refresh_action_view,null);
+        mItemRefresh.setActionView(view);
+        mItemRefresh.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mItemRefresh.getActionView().startAnimation(rotate);
+                refreshWeather();
+            }
+        });
+
         mItemAdd = menu.findItem(R.id.action_add);
+        View addView = View.inflate(this,R.layout.add_action_view,null);
+        mItemAdd.setActionView(addView);
+        mItemAdd.getActionView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addCity();
+            }
+        });
+
+//        MenuItem itemSetting = menu.findItem(R.id.action_settings);
+//        View viewSetting = View.inflate(this,R.layout.setting_action_view,null);
+//        itemSetting.setActionView(viewSetting);
+
+
         checkCurrentPager(vpMain.getCurrentItem());
 
         return true;
@@ -166,19 +343,28 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_refresh) {
+//        if (id == R.id.action_refresh) {
 //            System.out.println("refresh clicked");
-            refreshWeather();
-        }
+//            refreshWeather();
+//        }
 
-        if (id == R.id.action_add) {
+//        if (id == R.id.action_add) {
 //            System.out.println("add clicked");
-            addCity();
+//            addCity();
+//        }
+
+        if (id == R.id.action_apps) {
+            Intent intent = new Intent(this,AppsActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-//            System.out.println("setting");
+        if (id == R.id.action_setting) {
+            return true;
+        }
+
+        if (id == R.id.action_share) {
             return true;
         }
 

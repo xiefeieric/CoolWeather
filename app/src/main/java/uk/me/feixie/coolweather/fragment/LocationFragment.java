@@ -21,6 +21,7 @@ import java.util.List;
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.db.CoolWeatherDB;
 import uk.me.feixie.coolweather.model.City;
+import uk.me.feixie.coolweather.util.UIUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -57,8 +58,12 @@ public class LocationFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
     }
 
-    public void test() {
-        System.out.println("test print location");
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void initData() {
@@ -93,7 +98,8 @@ public class LocationFragment extends Fragment {
 
             if (position == 0) {
                 holder.tvLocationName.setText(mCityList.get(position).getName());
-                holder.ivLocationDelete.setVisibility(View.GONE);
+//                holder.ivLocationDelete.setVisibility(View.GONE);
+                holder.ivLocationDelete.setImageDrawable(getResources().getDrawable(R.drawable.ic_my_location_white_24dp));
             }
 
             if (clickPosition == position) {
@@ -172,18 +178,24 @@ public class LocationFragment extends Fragment {
             ivLocationDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final City city = mCityList.get(getAdapterPosition());
-                    mCityList.remove(city);
-                    mAdapter.notifyItemRemoved(getAdapterPosition());
 
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getContext());
-                            coolWeatherDB.deleteCity(city);
+                    if (getAdapterPosition()!=0) {
+                        if (getAdapterPosition()!=clickPosition) {
+                            final City city = mCityList.get(getAdapterPosition());
+                            mCityList.remove(city);
+                            mAdapter.notifyItemRemoved(getAdapterPosition());
+
+                            new Thread(){
+                                @Override
+                                public void run() {
+                                    CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getContext());
+                                    coolWeatherDB.deleteCity(city);
+                                }
+                            }.start();
+                        } else {
+                            UIUtils.showToast(getContext(),"Selected city can not be deleted!");
                         }
-                    }.start();
-
+                    }
                 }
             });
 

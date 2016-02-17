@@ -164,20 +164,41 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                 } else {
                     Address address = addressList.get(0);
 //                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
-                    mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
+                    String current_city = mSharedPreferences.getString("current_city", "");
+                    if (TextUtils.isEmpty(current_city)) {
 
-                    boolean cityInList = checkCityInList(mSharedPreferences.getString("current_city", ""));
+                        mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
 
-                    if (!cityInList) {
-                        City city = new City();
-                        city.setName(address.getLocality());
-                        city.setLongitude(String.valueOf(address.getLongitude()));
-                        city.setLatitude(String.valueOf(address.getLatitude()));
-                        city.setPostcode(address.getPostalCode());
-                        city.setCountry(address.getCountryName());
-                        city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
-                        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
-                        coolWeatherDB.saveCity(city);
+                        boolean cityInList = checkCityInList(mSharedPreferences.getString("current_city", ""));
+
+                        if (!cityInList) {
+                            City city = new City();
+                            city.setName(address.getLocality());
+                            city.setLongitude(String.valueOf(address.getLongitude()));
+                            city.setLatitude(String.valueOf(address.getLatitude()));
+                            city.setPostcode(address.getPostalCode());
+                            city.setCountry(address.getCountryName());
+                            city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
+                            CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+                            coolWeatherDB.saveCity(city);
+                        }
+
+                    } else {
+
+                        if (!address.getLocality().equalsIgnoreCase(current_city)) {
+                            if (!checkCityInList(address.getLocality())) {
+                                mSharedPreferences.edit().putString("current_city",address.getLocality()).apply();
+                                City city = new City();
+                                city.setName(address.getLocality());
+                                city.setLongitude(String.valueOf(address.getLongitude()));
+                                city.setLatitude(String.valueOf(address.getLatitude()));
+                                city.setPostcode(address.getPostalCode());
+                                city.setCountry(address.getCountryName());
+                                city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
+                                CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+                                coolWeatherDB.updateCurrentCity(city);
+                            }
+                        }
                     }
 
                     String select_city = mSharedPreferences.getString("select_city", "");

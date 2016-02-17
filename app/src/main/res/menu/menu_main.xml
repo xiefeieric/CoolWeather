@@ -5,9 +5,8 @@
 
     <item
         android:id="@+id/action_refresh"
+        android:orderInCategory="100"
         android:icon="@drawable/ic_refresh_white_24dp"
-        android:actionViewClass=
-            "com.manuelpeinado.refreshactionitem.RefreshActionItem"
         android:title="Refresh"
         app:showAsAction="ifRoom"/>
     <item
@@ -18,8 +17,43 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never"/>
+        android:id="@+id/overflow"
+        android:icon="@drawable/ic_more_vert_white_24dp"
+        android:orderInCategory="201"
+        android:title="Overflow"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/action_apps"
+                android:icon="@drawable/ic_get_app_black_18dp"
+                android:orderInCategory="100"
+                android:title="My Apps"
+                app:showAsAction="always|withText">
+            </item>
+
+            <item
+                android:id="@+id/action_setting"
+                android:icon="@drawable/ic_settings_black_18dp"
+                android:orderInCategory="100"
+                android:title="Settings"
+                app:showAsAction="always|withText">
+            </item>
+
+            <item
+                android:id="@+id/action_share"
+                android:icon="@drawable/ic_share_black_18dp"
+                android:orderInCategory="100"
+                android:title="Share"
+                app:showAsAction="always|withText">
+            </item>
+
+        </menu>
+    </item>
+
+    <!--<item-->
+        <!--android:id="@+id/action_settings"-->
+        <!--android:orderInCategory="100"-->
+        <!--android:title="@string/action_settings"-->
+        <!--app:showAsAction="never"/>-->
 </menu>
