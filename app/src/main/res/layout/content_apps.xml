@@ -13,4 +13,11 @@
     tools:context="uk.me.feixie.coolweather.activity.AppsActivity"
     tools:showIn="@layout/activity_apps">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvApps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </android.support.v7.widget.RecyclerView>
+
 </RelativeLayout>

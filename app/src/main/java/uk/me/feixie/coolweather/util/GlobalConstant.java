@@ -21,4 +21,6 @@ public class GlobalConstant {
     public static final String LOCATION_STATUS_CURRENT = "gps";
     public static final String LOCATION_STATUS_INPUT = "input";
 
+    public static final String APPS_URL = "http://www.feixie.me.uk/apps.json";
+
 }

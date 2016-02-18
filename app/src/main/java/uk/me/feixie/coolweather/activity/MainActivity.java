@@ -18,12 +18,15 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.transition.Explode;
+import android.transition.Fade;
 import android.transition.Slide;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mFragmentArray = new SparseArrayCompat<>();
         initToolbar();
@@ -356,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_apps) {
             Intent intent = new Intent(this,AppsActivity.class);
             startActivity(intent);
+            overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.fade_out);
             return true;
         }
 
