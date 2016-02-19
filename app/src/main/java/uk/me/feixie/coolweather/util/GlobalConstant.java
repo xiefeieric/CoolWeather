@@ -10,7 +10,7 @@ public class GlobalConstant {
     public static final String WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/weather?q=";
     public static final String ONE_DAY_WEATHER_SERVER = "http://api.openweathermap.org/data/2.5/forecast?q=";
     public static final String WEATHER_FORECAST_SERVER = "http://api.openweathermap.org/data/2.5/forecast/daily?q=";
-//    api.openweathermap.org/data/2.5/forecast/daily?q=London&mode=xml&units=metric&cnt=7
+    //    api.openweathermap.org/data/2.5/forecast/daily?q=London&mode=xml&units=metric&cnt=7
 //    http://openweathermap.org/img/w/10d.png
     public static final String WEATHER_ICON_PATH = "http://openweathermap.org/img/w/";
 

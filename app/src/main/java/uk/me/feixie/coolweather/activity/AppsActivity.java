@@ -2,22 +2,16 @@ package uk.me.feixie.coolweather.activity;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Explode;
-import android.transition.Fade;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -30,13 +24,13 @@ import java.util.ArrayList;
 
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.model.ServerApps;
-import uk.me.feixie.coolweather.util.DividerItemDecoration;
 import uk.me.feixie.coolweather.util.GlobalConstant;
 
 public class AppsActivity extends AppCompatActivity {
 
 
     private ArrayList<ServerApps.App> mApps;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +55,9 @@ public class AppsActivity extends AppCompatActivity {
 
     private void initView() {
 
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.VISIBLE);
+
         RecyclerView rvApps = (RecyclerView) findViewById(R.id.rvApps);
         rvApps.setLayoutManager(new LinearLayoutManager(this));
         rvApps.setHasFixedSize(true);
@@ -78,7 +75,7 @@ public class AppsActivity extends AppCompatActivity {
     @Override
     public void finish() {
         super.finish();
-        overridePendingTransition(android.R.anim.fade_in,R.anim.slide_out_left);
+        overridePendingTransition(android.R.anim.fade_in, R.anim.slide_out_left);
     }
 
     private void loadDataFromWeb(String url) {
@@ -89,6 +86,7 @@ public class AppsActivity extends AppCompatActivity {
 
 //                System.out.println(result);
                 showApps(result);
+                mProgressBar.setVisibility(View.GONE);
 
             }
 
@@ -123,7 +121,7 @@ public class AppsActivity extends AppCompatActivity {
 
         @Override
         public AppsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = View.inflate(parent.getContext(),R.layout.item_rv_apps,null);
+            View view = View.inflate(parent.getContext(), R.layout.item_rv_apps, null);
             AppsViewHolder viewHolder = new AppsViewHolder(view);
             return viewHolder;
         }
@@ -133,7 +131,7 @@ public class AppsActivity extends AppCompatActivity {
 
             if (!getPackageName().equalsIgnoreCase(mApps.get(position).packageName)) {
                 ServerApps.App app = mApps.get(position);
-                x.image().bind(holder.ivAppsIcon,app.icon);
+                x.image().bind(holder.ivAppsIcon, app.icon);
                 holder.tvAppsTitle.setText(app.title);
                 holder.tvAppsStatus.setText(app.status);
                 holder.tvAppsDesc.setText(app.desc);
@@ -142,7 +140,7 @@ public class AppsActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            if (mApps!=null) {
+            if (mApps != null) {
                 return mApps.size();
             }
             return 0;

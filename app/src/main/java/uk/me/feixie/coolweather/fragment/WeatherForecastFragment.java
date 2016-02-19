@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 import uk.me.feixie.coolweather.R;
+import uk.me.feixie.coolweather.activity.SettingActivity;
 import uk.me.feixie.coolweather.model.DayWeather;
 import uk.me.feixie.coolweather.util.DividerItemDecoration;
 import uk.me.feixie.coolweather.util.GlobalConstant;
@@ -85,7 +86,16 @@ public class WeatherForecastFragment extends Fragment {
     }
 
     public void updateFromWeb(String cityName) {
-        RequestParams url = new RequestParams(GlobalConstant.WEATHER_FORECAST_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS+"&cnt=7");
+        RequestParams url;
+        String setting_temp = "";
+        if (mSharedPreferences!=null) {
+            setting_temp = mSharedPreferences.getString("setting_temp", "");
+        }
+        if (setting_temp.equalsIgnoreCase(SettingActivity.TEMP_FAHRENHEIT)) {
+            url = new RequestParams(GlobalConstant.WEATHER_FORECAST_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_FAHRENHEIT+"&cnt=7");
+        } else {
+            url = new RequestParams(GlobalConstant.WEATHER_FORECAST_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS+"&cnt=7");
+        }
 //        System.out.println(url.toString());
         x.http().get(url, new Callback.CacheCallback<String>() {
             @Override

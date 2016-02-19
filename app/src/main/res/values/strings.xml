@@ -5,4 +5,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_apps">My Apps</string>
+    <string name="title_activity_setting">Settings</string>
+    <string name="units">Units</string>
+    <string name="c_temp">°C</string>
+    <string name="f_temp">°F</string>
 </resources>

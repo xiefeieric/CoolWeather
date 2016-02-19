@@ -1,16 +1,15 @@
 package uk.me.feixie.coolweather.activity;
 
-import android.animation.Animator;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.SparseArrayCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -18,20 +17,13 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.transition.Explode;
-import android.transition.Fade;
-import android.transition.Slide;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -47,9 +39,10 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.viewpagerindicator.CirclePageIndicator;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import cn.sharesdk.framework.ShareSDK;
+import cn.sharesdk.onekeyshare.OnekeyShare;
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.db.CoolWeatherDB;
 import uk.me.feixie.coolweather.fragment.CurrentWeatherFragment;
@@ -57,6 +50,7 @@ import uk.me.feixie.coolweather.fragment.LocationFragment;
 import uk.me.feixie.coolweather.fragment.OneDayWeatherFragment;
 import uk.me.feixie.coolweather.fragment.WeatherForecastFragment;
 import uk.me.feixie.coolweather.model.City;
+import uk.me.feixie.coolweather.util.GlobalConstant;
 import uk.me.feixie.coolweather.util.UIUtils;
 
 public class MainActivity extends AppCompatActivity {
@@ -76,12 +70,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ShareSDK.initSDK(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mFragmentArray = new SparseArrayCompat<>();
         initToolbar();
         initViews();
         initListeners();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        refreshWeather();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ShareSDK.stopSDK(this);
     }
 
     private void initToolbar() {
@@ -91,10 +97,10 @@ public class MainActivity extends AppCompatActivity {
 //        supportActionBar.setDisplayShowHomeEnabled(true);
         supportActionBar.setTitle("");
         mTextView = new TextView(this);
-        if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
-            mTextView.setText(mSharedPreferences.getString("current_city",""));
+        if (TextUtils.isEmpty(mSharedPreferences.getString("select_city", ""))) {
+            mTextView.setText(mSharedPreferences.getString("current_city", ""));
         } else {
-            mTextView.setText(mSharedPreferences.getString("select_city",""));
+            mTextView.setText(mSharedPreferences.getString("select_city", ""));
         }
         mTextView.setTextColor(getResources().getColor(R.color.white));
         mTextView.setTextSize(20);
@@ -112,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
 
         FragmentManager supportFragmentManager = getSupportFragmentManager();
-        mFragmentArray.put(0,new LocationFragment());
-        mFragmentArray.put(1,new CurrentWeatherFragment());
-        mFragmentArray.put(2,new OneDayWeatherFragment());
-        mFragmentArray.put(3,new WeatherForecastFragment());
+        mFragmentArray.put(0, new LocationFragment());
+        mFragmentArray.put(1, new CurrentWeatherFragment());
+        mFragmentArray.put(2, new OneDayWeatherFragment());
+        mFragmentArray.put(3, new WeatherForecastFragment());
 
         vpMain = (ViewPager) findViewById(R.id.vpMain);
         mAdapter = new MyPagerAdapter(supportFragmentManager);
@@ -123,10 +129,11 @@ public class MainActivity extends AppCompatActivity {
         vpMain.setCurrentItem(1);
 
         CirclePageIndicator circlePageIndicator = (CirclePageIndicator) findViewById(R.id.vpiMain);
-        circlePageIndicator.setViewPager(vpMain,1);
+        circlePageIndicator.setViewPager(vpMain, 1);
     }
 
     private int pagePosition;
+
     private void initListeners() {
 
         final Animation fadeIn = new AlphaAnimation(0, 1);
@@ -139,16 +146,16 @@ public class MainActivity extends AppCompatActivity {
         fadeOut.setDuration(500);
         fadeOut.setFillAfter(true);
 
-        Animation rotate = new RotateAnimation(0,360,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        Animation rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotate.setInterpolator(new AccelerateInterpolator());
         rotate.setDuration(500);
 
 
-        Animation scale = new ScaleAnimation(1.0f,0.1f,1.0f,0.1f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        Animation scale = new ScaleAnimation(1.0f, 0.1f, 1.0f, 0.1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         scale.setDuration(500);
         scale.setInterpolator(new LinearInterpolator());
 
-        final AnimationSet animationSet = new AnimationSet(this,null);
+        final AnimationSet animationSet = new AnimationSet(this, null);
         animationSet.addAnimation(rotate);
         animationSet.addAnimation(scale);
 
@@ -164,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 //                checkCurrentPager(position);
                 pagePosition = position;
 
-                if (position==0) {
+                if (position == 0) {
 
                     mTextView.startAnimation(fadeOut);
                     fadeOut.setAnimationListener(new Animation.AnimationListener() {
@@ -203,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-                } else if (position==1) {
+                } else if (position == 1) {
                     mTextView.startAnimation(fadeOut);
                     fadeOut.setAnimationListener(new Animation.AnimationListener() {
                         @Override
@@ -213,10 +220,10 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            if (TextUtils.isEmpty(mSharedPreferences.getString("select_city",""))) {
-                                mTextView.setText(mSharedPreferences.getString("current_city",""));
+                            if (TextUtils.isEmpty(mSharedPreferences.getString("select_city", ""))) {
+                                mTextView.setText(mSharedPreferences.getString("current_city", ""));
                             } else {
-                                mTextView.setText(mSharedPreferences.getString("select_city",""));
+                                mTextView.setText(mSharedPreferences.getString("select_city", ""));
                             }
                             mTextView.startAnimation(fadeIn);
                         }
@@ -257,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (vpMain.getCurrentItem()!=0) {
+                if (vpMain.getCurrentItem() != 0) {
                     selectCity();
                 }
             }
@@ -270,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         CharSequence[] items = new CharSequence[cityList.size()];
         for (int i = 0; i < cityList.size(); i++) {
-            items[i] = cityList.get(i).getName()+", "+cityList.get(i).getCountry();
+            items[i] = cityList.get(i).getName() + ", " + cityList.get(i).getCountry();
         }
         builder.setTitle("Select Location");
         builder.setItems(items, new DialogInterface.OnClickListener() {
@@ -278,18 +285,24 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 City city = cityList.get(which);
 //                System.out.println(city.getName());
-                mSharedPreferences.edit().putString("select_city",city.getName()).apply();
+                mSharedPreferences.edit().putString("select_city", city.getName()).apply();
                 mSharedPreferences.edit().putString("location_click_position", String.valueOf(which)).apply();
                 mTextView.setText(city.getName());
+                CurrentWeatherFragment currentWeatherFragment = (CurrentWeatherFragment) mFragmentArray.get(1);
+                ImageView ivCurrentWeather = currentWeatherFragment.getIvCurrentWeather();
+                if (ivCurrentWeather != null) {
+                    ivCurrentWeather.clearAnimation();
+                }
                 refreshWeather();
+
             }
         });
-        builder.setNegativeButton("CANCEL",null);
+        builder.setNegativeButton("CANCEL", null);
         builder.show();
     }
 
     private void checkCurrentPager(int position) {
-        if (position==0) {
+        if (position == 0) {
             mItemRefresh.getActionView().clearAnimation();
             mItemRefresh.setVisible(false);
             mItemRefresh.getActionView().setVisibility(View.GONE);
@@ -303,14 +316,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        final Animation rotate = new RotateAnimation(0,360,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+        final Animation rotate = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotate.setInterpolator(new LinearInterpolator());
         rotate.setDuration(1000);
 
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         mItemRefresh = menu.findItem(R.id.action_refresh);
-        View view = View.inflate(this,R.layout.refresh_action_view,null);
+        View view = View.inflate(this, R.layout.refresh_action_view, null);
         mItemRefresh.setActionView(view);
         mItemRefresh.getActionView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -321,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mItemAdd = menu.findItem(R.id.action_add);
-        View addView = View.inflate(this,R.layout.add_action_view,null);
+        View addView = View.inflate(this, R.layout.add_action_view, null);
         mItemAdd.setActionView(addView);
         mItemAdd.getActionView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -358,18 +371,22 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         if (id == R.id.action_apps) {
-            Intent intent = new Intent(this,AppsActivity.class);
+            Intent intent = new Intent(this, AppsActivity.class);
             startActivity(intent);
-            overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.fade_out);
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out);
             return true;
         }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_setting) {
+            Intent intent = new Intent(this, SettingActivity.class);
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.fade_out);
             return true;
         }
 
         if (id == R.id.action_share) {
+            showShare();
             return true;
         }
 
@@ -386,12 +403,12 @@ public class MainActivity extends AppCompatActivity {
         WeatherForecastFragment weatherFragment = (WeatherForecastFragment) mFragmentArray.get(3);
 
         if (!TextUtils.isEmpty(current_city) && TextUtils.isEmpty(select_city)) {
-            current_city = current_city.replaceAll("\\s+","");
+            current_city = current_city.replaceAll("\\s+", "");
             currentWeatherFragment.updateFromWeb(current_city);
             oneDayWeatherFragment.updateFromWeb(current_city);
             weatherFragment.updateFromWeb(current_city);
         } else {
-            select_city = select_city.replaceAll("\\s+","");
+            select_city = select_city.replaceAll("\\s+", "");
             currentWeatherFragment.updateFromWeb(select_city);
             oneDayWeatherFragment.updateFromWeb(select_city);
             weatherFragment.updateFromWeb(select_city);
@@ -414,9 +431,9 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
 
         } catch (GooglePlayServicesRepairableException e) {
-            UIUtils.showToast(this,e.getMessage());
+            UIUtils.showToast(this, e.getMessage());
         } catch (GooglePlayServicesNotAvailableException e) {
-            UIUtils.showToast(this,e.getMessage());
+            UIUtils.showToast(this, e.getMessage());
         }
 
     }
@@ -430,16 +447,17 @@ public class MainActivity extends AppCompatActivity {
                 String name = place.getName().toString();
                 city.setName(name);
                 String[] splitAddress = place.getAddress().toString().split(",");
-                String country = splitAddress[splitAddress.length-1];
+                String country = splitAddress[splitAddress.length - 1];
                 city.setCountry(country);
                 city.setLatitude(String.valueOf(place.getLatLng().latitude));
                 city.setLongitude(String.valueOf(place.getLatLng().longitude));
+                city.setStatus(GlobalConstant.LOCATION_STATUS_INPUT);
 
                 if (checkCityName(name)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Error");
                     builder.setMessage("Location already added");
-                    builder.setPositiveButton("OK",null);
+                    builder.setPositiveButton("OK", null);
                     builder.show();
                 } else {
 
@@ -450,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
-                UIUtils.showToast(this,status.getStatusMessage());
+                UIUtils.showToast(this, status.getStatusMessage());
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
             }
@@ -467,6 +485,41 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return false;
+    }
+
+    private void showShare() {
+        ShareSDK.initSDK(this);
+        OnekeyShare oks = new OnekeyShare();
+        //关闭sso授权
+        oks.disableSSOWhenAuthorize();
+        // 分享时Notification的图标和文字  2.5.9以后的版本不调用此方法
+        //oks.setNotification(R.drawable.ic_launcher, getString(R.string.app_name));
+        // title标题，印象笔记、邮箱、信息、微信、人人网和QQ空间使用
+        String applicationLabel = "App Share";
+        try {
+            ApplicationInfo applicationInfo = getApplication().getPackageManager().getApplicationInfo(getPackageName(), 0);
+            applicationLabel = String.valueOf(getPackageManager().getApplicationLabel(applicationInfo));
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        oks.setTitle(applicationLabel);
+
+        // titleUrl是标题的网络链接，仅在人人网和QQ空间使用
+//        oks.setTitleUrl("http://sharesdk.cn");
+        // text是分享文本，所有平台都需要这个字段
+        oks.setText("I would recommend this app for you." + "\n" + "https://play.google.com/store/apps/details?id=" + getPackageName());
+        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
+//        oks.setImagePath("/sdcard/test.jpg");//确保SDcard下面存在此张图片
+        // url仅在微信（包括好友和朋友圈）中使用
+        oks.setUrl("https://play.google.com/store/apps/details?id=" + getPackageName());
+        // comment是我对这条分享的评论，仅在人人网和QQ空间使用
+//        oks.setComment("我是测试评论文本");
+        // site是分享此内容的网站名称，仅在QQ空间使用
+//        oks.setSite(getString(R.string.app_name));
+        // siteUrl是分享此内容的网站地址，仅在QQ空间使用
+        oks.setSiteUrl("https://play.google.com/store/apps/details?id=" + getPackageName());
+// 启动分享GUI
+        oks.show(this);
     }
 
 

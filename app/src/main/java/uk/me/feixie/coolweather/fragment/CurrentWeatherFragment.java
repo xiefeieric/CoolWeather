@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 
 import uk.me.feixie.coolweather.R;
+import uk.me.feixie.coolweather.activity.SettingActivity;
 import uk.me.feixie.coolweather.db.CoolWeatherDB;
 import uk.me.feixie.coolweather.model.City;
 import uk.me.feixie.coolweather.util.GlobalConstant;
@@ -58,6 +59,11 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     private TextView tvHumidity;
     private TextView tvWindSpeed;
     private SharedPreferences mSharedPreferences;
+
+    public ImageView getIvCurrentWeather() {
+        return ivCurrentWeather;
+    }
+
     private ImageView ivCurrentWeather;
     private ImageView ivCurrentWeatherCover;
 
@@ -239,7 +245,13 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     }
 
     public void updateFromWeb(String cityName) {
-        RequestParams url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
+        RequestParams url;
+        String setting_temp = mSharedPreferences.getString("setting_temp", "");
+        if (setting_temp.equalsIgnoreCase(SettingActivity.TEMP_FAHRENHEIT)) {
+            url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_FAHRENHEIT);
+        } else {
+            url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
+        }
 //        System.out.println(url.toString());
         x.http().get(url, new Callback.CommonCallback<String>() {
 
