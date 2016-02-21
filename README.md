@@ -1,4 +1,4 @@
-# CoolWeather
+# Cool Weather
 Easy to use weather app, know the weather anytime and anywhere.
 
 Cool Weather is an easy to use app which let you staying updated with weather conditions all the time.
