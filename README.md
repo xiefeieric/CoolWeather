@@ -14,7 +14,7 @@ Features:
 
 Any feedback and suggestions are welcome.
 
-<img src="https://cloud.githubusercontent.com/assets/11439385/13202069/d9ef5236-d884-11e5-9ffd-d28bc2f0a8b7.png" height="200" width="200"/>
+<img src="https://cloud.githubusercontent.com/assets/11439385/13202069/d9ef5236-d884-11e5-9ffd-d28bc2f0a8b7.png" height="300" width="100"/>
 
 ![screenshot_20160219-222447](https://cloud.githubusercontent.com/assets/11439385/13202069/d9ef5236-d884-11e5-9ffd-d28bc2f0a8b7.png)
 ![screenshot_20160219-222502](https://cloud.githubusercontent.com/assets/11439385/13202075/ec0a3c06-d884-11e5-89e1-d1242a275275.png)
