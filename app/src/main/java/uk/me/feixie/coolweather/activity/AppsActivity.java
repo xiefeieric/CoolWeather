@@ -1,12 +1,15 @@
 package uk.me.feixie.coolweather.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -31,11 +34,14 @@ public class AppsActivity extends AppCompatActivity {
 
     private ArrayList<ServerApps.App> mApps;
     private ProgressBar mProgressBar;
+    private AppsAdapter mAdapter;
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apps);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         initToolbar();
         initView();
         initData();
@@ -61,8 +67,8 @@ public class AppsActivity extends AppCompatActivity {
         RecyclerView rvApps = (RecyclerView) findViewById(R.id.rvApps);
         rvApps.setLayoutManager(new LinearLayoutManager(this));
         rvApps.setHasFixedSize(true);
-        AppsAdapter adapter = new AppsAdapter();
-        rvApps.setAdapter(adapter);
+        mAdapter = new AppsAdapter();
+        rvApps.setAdapter(mAdapter);
 
     }
 
@@ -70,6 +76,10 @@ public class AppsActivity extends AppCompatActivity {
         x.Ext.init(getApplication());
         x.Ext.setDebug(true);
         loadDataFromWeb(GlobalConstant.APPS_URL);
+        String apps = mSharedPreferences.getString("apps", "");
+        if (!TextUtils.isEmpty(apps)) {
+            showApps(apps);
+        }
     }
 
     @Override
@@ -84,10 +94,13 @@ public class AppsActivity extends AppCompatActivity {
             @Override
             public void onSuccess(String result) {
 
-//                System.out.println(result);
-                showApps(result);
-                mProgressBar.setVisibility(View.GONE);
-
+                String apps = mSharedPreferences.getString("apps", "");
+                if (!TextUtils.equals(apps,result)) {
+                    mSharedPreferences.edit().putString("apps",result).apply();
+                }
+                if (TextUtils.isEmpty(apps)) {
+                    showApps(result);
+                }
             }
 
             @Override
@@ -102,7 +115,7 @@ public class AppsActivity extends AppCompatActivity {
 
             @Override
             public void onFinished() {
-
+                mProgressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -112,8 +125,7 @@ public class AppsActivity extends AppCompatActivity {
         Gson gson = new Gson();
         ServerApps serverApps = gson.fromJson(result, ServerApps.class);
         mApps = serverApps.apps;
-
-
+        mAdapter.notifyDataSetChanged();
     }
 
 

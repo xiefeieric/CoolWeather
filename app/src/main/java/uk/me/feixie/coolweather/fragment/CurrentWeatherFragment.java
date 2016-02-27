@@ -217,6 +217,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
 
             } catch (IOException e) {
                 e.printStackTrace();
+                updateCurrentWeather();
                 UIUtils.showToast(getActivity(), "Service not available!");
             }
         }
