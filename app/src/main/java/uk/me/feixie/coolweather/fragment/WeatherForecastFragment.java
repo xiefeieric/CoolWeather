@@ -33,6 +33,7 @@ import uk.me.feixie.coolweather.model.DayWeather;
 import uk.me.feixie.coolweather.util.DividerItemDecoration;
 import uk.me.feixie.coolweather.util.GlobalConstant;
 import uk.me.feixie.coolweather.util.NumberHelper;
+import uk.me.feixie.coolweather.util.UIUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -96,36 +97,46 @@ public class WeatherForecastFragment extends Fragment {
         } else {
             url = new RequestParams(GlobalConstant.WEATHER_FORECAST_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS+"&cnt=7");
         }
-//        System.out.println(url.toString());
+        url.setCacheMaxAge(1000 * 60);
+
         x.http().get(url, new Callback.CacheCallback<String>() {
+
+            private boolean hasError = false;
+            private String result = null;
+
             @Override
             public boolean onCache(String result) {
-//                System.out.println(result);
+
+                this.result = result;
                 return false;
             }
 
             @Override
             public void onSuccess(String result) {
-//                System.out.println(result);
-                handleWeatherResponse(result);
-                mAdapter.notifyDataSetChanged();
-//                System.out.println(mDayWeatherList.toString());
-//                updateCurrentWeather();
+
+                this.result = result;
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
 
+                hasError = true;
+                System.out.println("Network Error");
             }
 
             @Override
             public void onCancelled(CancelledException cex) {
 
+                UIUtils.showToast(getActivity(), "Cancelled");
             }
 
             @Override
             public void onFinished() {
 
+                if (!hasError && result!=null) {
+                    handleWeatherResponse(result);
+                    mAdapter.notifyDataSetChanged();
+                }
             }
         });
     }

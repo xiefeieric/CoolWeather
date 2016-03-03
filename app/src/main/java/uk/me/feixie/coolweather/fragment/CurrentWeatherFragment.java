@@ -1,10 +1,13 @@
 package uk.me.feixie.coolweather.fragment;
 
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -23,6 +26,7 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,6 +43,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import uk.me.feixie.coolweather.R;
 import uk.me.feixie.coolweather.activity.SettingActivity;
@@ -51,9 +56,9 @@ import uk.me.feixie.coolweather.util.UIUtils;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class CurrentWeatherFragment extends Fragment  {
 
-    private GoogleApiClient mGoogleApiClient;
+//    private GoogleApiClient mGoogleApiClient;
     private TextView tvTemp;
     private TextView tvDesc;
     private TextView tvHumidity;
@@ -76,6 +81,9 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_current_weather, container, false);
+        if (!isNetworkAvailable()) {
+            Toast.makeText(getActivity(),"No network, Please check your internet setting.",Toast.LENGTH_LONG).show();
+        }
         initData();
         initViews(view);
         return view;
@@ -86,13 +94,13 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
         x.Ext.init(getActivity().getApplication());
         x.Ext.setDebug(true);
 
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
+//        if (mGoogleApiClient == null) {
+//            mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+//                    .addConnectionCallbacks(this)
+//                    .addOnConnectionFailedListener(this)
+//                    .addApiIfAvailable(LocationServices.API)
+//                    .build();
+//        }
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
@@ -147,136 +155,156 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
     @Override
     public void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+//        mGoogleApiClient.connect();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+//        mGoogleApiClient.disconnect();
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
+//    @Override
+//    public void onConnected(@Nullable Bundle bundle) {
 
-        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (lastLocation != null) {
+//        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+//        if (lastLocation != null) {
+//
+//            try {
+//                Geocoder geocoder = new Geocoder(getActivity());
+//                List<Address> addressList = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
+//                if (addressList == null || addressList.size() == 0) {
+//                    UIUtils.showToast(getActivity(), "No address found!");
+//                } else {
+//                    Address address = addressList.get(0);
+////                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
+//                    String current_city = mSharedPreferences.getString("current_city", "");
+//                    if (TextUtils.isEmpty(current_city)) {
+//
+//                        mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
+//
+//                        boolean cityInList = checkCityInList(mSharedPreferences.getString("current_city", ""));
+//
+//                        if (!cityInList) {
+//                            City city = new City();
+//                            city.setName(address.getLocality());
+//                            city.setLongitude(String.valueOf(address.getLongitude()));
+//                            city.setLatitude(String.valueOf(address.getLatitude()));
+//                            city.setPostcode(address.getPostalCode());
+//                            city.setCountry(address.getCountryName());
+//                            city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
+//                            CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+//                            coolWeatherDB.saveCity(city);
+//                        }
+//
+//                    } else {
+//
+//                        if (!address.getLocality().equalsIgnoreCase(current_city)) {
+//                            if (!checkCityInList(address.getLocality())) {
+//                                mSharedPreferences.edit().putString("current_city",address.getLocality()).apply();
+//                                City city = new City();
+//                                city.setName(address.getLocality());
+//                                city.setLongitude(String.valueOf(address.getLongitude()));
+//                                city.setLatitude(String.valueOf(address.getLatitude()));
+//                                city.setPostcode(address.getPostalCode());
+//                                city.setCountry(address.getCountryName());
+//                                city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
+//                                CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+//                                coolWeatherDB.updateCurrentCity(city);
+//                            }
+//                        }
+//                    }
+//
+//                    String select_city = mSharedPreferences.getString("select_city", "");
+//                    if (TextUtils.isEmpty(select_city)) {
+//                        updateFromWeb(address.getLocality());
+//                    } else {
+//                        updateFromWeb(select_city);
+//                    }
+//                }
+//
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                updateCurrentWeather();
+//                UIUtils.showToast(getActivity(), "Service not available!");
+//            }
+//        }
 
-            try {
-                Geocoder geocoder = new Geocoder(getActivity());
-                List<Address> addressList = geocoder.getFromLocation(lastLocation.getLatitude(), lastLocation.getLongitude(), 1);
-                if (addressList == null || addressList.size() == 0) {
-                    UIUtils.showToast(getActivity(), "No address found!");
-                } else {
-                    Address address = addressList.get(0);
-//                    System.out.println(address.getCountryCode()+"/"+address.getLocality());
-                    String current_city = mSharedPreferences.getString("current_city", "");
-                    if (TextUtils.isEmpty(current_city)) {
+//    }
+//
+//    @Override
+//    public void onConnectionSuspended(int i) {
+//
+//    }
+//
+//    @Override
+//    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+//
+//    }
 
-                        mSharedPreferences.edit().putString("current_city", address.getLocality()).apply();
+//    private boolean checkCityInList(String city) {
+//        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
+//        List<City> cities = coolWeatherDB.queryAllCity();
+//        for (int i = 0; i < cities.size(); i++) {
+//            boolean inList = cities.get(i).getName().equalsIgnoreCase(city);
+//            if (inList)
+//                return true;
+//        }
+//        return false;
+//    }
 
-                        boolean cityInList = checkCityInList(mSharedPreferences.getString("current_city", ""));
-
-                        if (!cityInList) {
-                            City city = new City();
-                            city.setName(address.getLocality());
-                            city.setLongitude(String.valueOf(address.getLongitude()));
-                            city.setLatitude(String.valueOf(address.getLatitude()));
-                            city.setPostcode(address.getPostalCode());
-                            city.setCountry(address.getCountryName());
-                            city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
-                            CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
-                            coolWeatherDB.saveCity(city);
-                        }
-
-                    } else {
-
-                        if (!address.getLocality().equalsIgnoreCase(current_city)) {
-                            if (!checkCityInList(address.getLocality())) {
-                                mSharedPreferences.edit().putString("current_city",address.getLocality()).apply();
-                                City city = new City();
-                                city.setName(address.getLocality());
-                                city.setLongitude(String.valueOf(address.getLongitude()));
-                                city.setLatitude(String.valueOf(address.getLatitude()));
-                                city.setPostcode(address.getPostalCode());
-                                city.setCountry(address.getCountryName());
-                                city.setStatus(GlobalConstant.LOCATION_STATUS_CURRENT);
-                                CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
-                                coolWeatherDB.updateCurrentCity(city);
-                            }
-                        }
-                    }
-
-                    String select_city = mSharedPreferences.getString("select_city", "");
-                    if (TextUtils.isEmpty(select_city)) {
-                        updateFromWeb(address.getLocality());
-                    } else {
-                        updateFromWeb(select_city);
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                updateCurrentWeather();
-                UIUtils.showToast(getActivity(), "Service not available!");
-            }
-        }
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    private boolean checkCityInList(String city) {
-        CoolWeatherDB coolWeatherDB = CoolWeatherDB.getInstance(getActivity());
-        List<City> cities = coolWeatherDB.queryAllCity();
-        for (int i = 0; i < cities.size(); i++) {
-            boolean inList = cities.get(i).getName().equalsIgnoreCase(city);
-            if (inList)
-                return true;
-        }
-        return false;
-    }
 
     public void updateFromWeb(String cityName) {
+
         RequestParams url;
         String setting_temp = mSharedPreferences.getString("setting_temp", "");
+
         if (setting_temp.equalsIgnoreCase(SettingActivity.TEMP_FAHRENHEIT)) {
             url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_FAHRENHEIT);
         } else {
             url = new RequestParams(GlobalConstant.WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
         }
+        url.setCacheMaxAge(1000 * 60);
 //        System.out.println(url.toString());
-        x.http().get(url, new Callback.CommonCallback<String>() {
+        x.http().get(url, new Callback.CacheCallback<String>() {
+
+            private boolean hasError = false;
+            private String result = null;
+
+            @Override
+            public boolean onCache(String result) {
+
+                this.result = result;
+
+                return false;
+            }
 
             @Override
             public void onSuccess(String result) {
-//                System.out.println(result);
-                handleWeatherResponse(result);
-                updateCurrentWeather();
-//                System.out.println("refresh");
+//
+                this.result = result;
+
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
 
+                hasError = true;
+                System.out.println("Network Error");
+
             }
 
             @Override
             public void onCancelled(CancelledException cex) {
-
+                UIUtils.showToast(getActivity(), "Cancelled");
             }
 
             @Override
             public void onFinished() {
-
+                if (!hasError && result!=null) {
+                    handleWeatherResponse(result);
+                    updateCurrentWeather();
+                }
             }
         });
     }
@@ -309,7 +337,7 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
 
     private void saveWeatherInfoToLocal(String description, String icon, String temp, String humidity, String speed) {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("description", description);
         editor.putString("icon", icon);
@@ -601,5 +629,12 @@ public class CurrentWeatherFragment extends Fragment implements GoogleApiClient.
             });
 
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

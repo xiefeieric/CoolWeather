@@ -90,6 +90,7 @@ public class OneDayWeatherFragment extends Fragment {
     }
 
     public void updateFromWeb(String cityName) {
+
         RequestParams url;
         String setting_temp = mSharedPreferences.getString("setting_temp", "");
         if (setting_temp.equalsIgnoreCase(SettingActivity.TEMP_FAHRENHEIT)) {
@@ -97,30 +98,49 @@ public class OneDayWeatherFragment extends Fragment {
         } else {
             url = new RequestParams(GlobalConstant.ONE_DAY_WEATHER_SERVER + cityName + GlobalConstant.OPEN_API_KEY + GlobalConstant.UNIT_CELSIUS);
         }
-//        System.out.println(url.toString());
-        x.http().get(url, new Callback.CommonCallback<String>() {
+        url.setCacheMaxAge(1000 * 60);
+
+        x.http().get(url, new Callback.CacheCallback<String>() {
+
+            private boolean hasError = false;
+            private String result = null;
+
+            @Override
+            public boolean onCache(String result) {
+
+                this.result = result;
+
+                return false;
+            }
 
             @Override
             public void onSuccess(String result) {
-//                System.out.println(result);
-                handleWeatherResponse(result);
-                mAdapter.notifyDataSetChanged();
-                tvOneDayDesc.setText(mHourWeatherList.get(0).getDescription());
+
+                this.result = result;
+
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-//                UIUtils.showToast(getContext(), "Network Error! Please try again later!");
+
+                hasError = true;
+                System.out.println("Network Error");
             }
 
             @Override
             public void onCancelled(CancelledException cex) {
 
+                UIUtils.showToast(getActivity(), "Cancelled");
             }
 
             @Override
             public void onFinished() {
 
+                if (!hasError && result!=null) {
+                    handleWeatherResponse(result);
+                    mAdapter.notifyDataSetChanged();
+                    tvOneDayDesc.setText(mHourWeatherList.get(0).getDescription());
+                }
             }
         });
     }

@@ -430,9 +430,7 @@ public class MainActivity extends AppCompatActivity {
 
             startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
 
-        } catch (GooglePlayServicesRepairableException e) {
-            UIUtils.showToast(this, e.getMessage());
-        } catch (GooglePlayServicesNotAvailableException e) {
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
             UIUtils.showToast(this, e.getMessage());
         }
 

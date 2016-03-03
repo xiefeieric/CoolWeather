@@ -7,20 +7,20 @@
         android:id="@+id/action_refresh"
         android:orderInCategory="100"
         android:icon="@drawable/ic_refresh_white_24dp"
-        android:title="Refresh"
+        android:title="@string/refresh"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_add"
         android:orderInCategory="100"
         android:icon="@drawable/ic_add_white_24dp"
-        android:title="Add"
+        android:title="@string/add"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/overflow"
         android:icon="@drawable/ic_more_vert_white_24dp"
         android:orderInCategory="201"
-        android:title="Overflow"
+        android:title="@string/overflow"
         app:showAsAction="always">
 
         <menu>
@@ -28,7 +28,7 @@
                 android:id="@+id/action_apps"
                 android:icon="@drawable/ic_get_app_black_18dp"
                 android:orderInCategory="100"
-                android:title="My Apps"
+                android:title="@string/my_apps"
                 app:showAsAction="always|withText">
             </item>
 
@@ -36,7 +36,7 @@
                 android:id="@+id/action_setting"
                 android:icon="@drawable/ic_settings_black_18dp"
                 android:orderInCategory="100"
-                android:title="Settings"
+                android:title="@string/settings"
                 app:showAsAction="always|withText">
             </item>
 
@@ -44,7 +44,7 @@
                 android:id="@+id/action_share"
                 android:icon="@drawable/ic_share_black_18dp"
                 android:orderInCategory="100"
-                android:title="Share"
+                android:title="@string/share"
                 app:showAsAction="always|withText">
             </item>
 
